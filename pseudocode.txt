@@ -1,0 +1,591 @@
+# Author:H.A.V Senith
+# Date:08/12/2024
+# Student ID:20240009
+
+START
+
+# Task A: Input Validation
+
+FUNCTION validate_data_input()
+
+    ## Prompt the user for a date in DD MM YYYY format
+
+    ## Validate day input
+
+    WHILE True
+        TRY
+            day = INPUT("Please enter the day of the survey in the format DD: ")
+            IF day is NOT in range 1 to 31 THEN
+                PRINT "Out of range-value must be in the range 1 and 31"
+                CONTINUE
+            END IF
+            BREAK
+        EXCEPT ValueError
+            PRINT "Integer required"
+        END TRY
+    END WHILE
+
+    ## Validate month input
+
+    WHILE True
+        TRY
+            month = INPUT("Please enter the month of the survey in the format MM: ")
+            IF month is NOT in range 1 to 12 THEN
+                PRINT "Out of range-value must be in the range 1 and 12"
+                CONTINUE
+            END IF
+            BREAK
+        EXCEPT ValueError
+            PRINT "Integer required"
+        END TRY
+    END WHILE
+
+    ## Validate year input
+
+    WHILE True
+        TRY
+            year = INPUT("Please enter the year of the survey in the format YYYY: ")
+            IF year is NOT in range 2000 to 2024 THEN
+                PRINT "Out of range-value must be in the range 2000 and 2024"
+                CONTINUE
+            END IF
+            BREAK
+        EXCEPT ValueError
+            PRINT "Integer required"  # Error message for invalid input
+        END TRY
+    END WHILE
+
+    RETURN day, month, year
+
+END FUNCTION
+
+FUNCTION validate_continue_input():
+    LOOP UNTIL valid choice is entered:
+        DISPLAY “Do you want to load another data set, ‘Y’ to yes or ‘N’ to no? (Y/N):”
+        INPUT choice
+        IF choice is 'Y' or 'N':
+            RETURN choice
+        ELSE:
+            DISPLAY “Invalid input. Please enter ‘Y’ to continue or ‘N’ to quit.”
+        ENDIF
+    END LOOP
+END FUNCTION
+
+## Task B: Processed Outcomes
+
+FUNCTION process_csv_data(file_path):
+    TRY:
+        OPEN the CSV file at file_path
+        READ data into a list of rows
+    END TRY
+
+    EXCEPT FileNotFoundError:
+        DISPLAY "ERROR: The file does not exist. Please check the file path."
+        RETURN None
+    END TRY
+
+    ## initialize variables
+    SET total_vehicles = 0
+    SET total_trucks = 0
+    SET total_electric_vehicles = 0
+    SET two_wheeled_vehicles = 0
+    SET busses_north = 0
+    SET vehicles_straight = 0
+    SET total_bicycles = 0
+    SET over_speed_limit = 0
+    SET vehicles_elm_avenue = 0
+    SET vehicles_hanley_highway = 0
+    SET scooters_elm = 0
+    SET hour_dict = EMPTY_DICTIONARY
+    SET rain_hours = EMPTY_SET
+
+
+    ## Loop through each row of data to count total vehicles
+
+    FOR each row in data:
+        INCREMENT total_vehicles by 1
+
+    ## Loop through each row of data to count trucks
+
+    FOR each row in data:
+        IF row['VehicleType'] == 'Truck' THEN
+            INCREMENT total_trucks by 1
+        ENDIF
+
+    ## Loop through each row of data to count electric vehicles
+
+    FOR each row in data:
+        IF row['elctricHybrid'] == 'True' THEN
+            INCREMENT total_electric_vehicles by 1
+        ENDIF
+
+    ## Loop through each row of data to count two-wheeled vehicles (Bicycle, Motorcycle, Scooter)
+
+    FOR each row in data:
+        IF row['VehicleType'] == 'Bicycle' THEN
+            INCREMENT two_wheeled_vehicles by 1
+        IF row['VehicleType'] == 'Motorcycle' THEN
+            INCREMENT two_wheeled_vehicles by 1
+        IF row['VehicleType'] == 'Scooter' THEN
+            INCREMENT two_wheeled_vehicles by 1
+
+    ## Loop through each row of data to count buses leaving Elm Avenue/Rabbit Road junction heading north
+
+    FOR each row in data:
+        IF row['JunctionName'] == 'Elm Avenue/Rabbit Road' AND row['travel_Direction_out'] == 'N' AND row['VehicleType'] == 'Buss' THEN
+            INCREMENT busses_north by 1
+        ENDIF
+
+    ## Loop through each row of data to count vehicles moving straight
+
+    FOR each row in data:
+        IF (
+            (row['travel_Direction_in'] == 'N' AND row['travel_Direction_out'] == 'N') OR
+            (row['travel_Direction_in'] == 'S' AND row['travel_Direction_out'] == 'S') OR
+            (row['travel_Direction_in'] == 'W' AND row['travel_Direction_out'] == 'W') OR
+            (row['travel_Direction_in'] == 'E' AND row['travel_Direction_out'] == 'E') OR
+            (row['travel_Direction_in'] == 'NE' AND row['travel_Direction_out'] == 'NE') OR
+            (row['travel_Direction_in'] == 'NW' AND row['travel_Direction_out'] == 'NW') OR
+            (row['travel_Direction_in'] == 'SE' AND row['travel_Direction_out'] == 'SE') OR
+            (row['travel_Direction_in'] == 'SW' AND row['travel_Direction_out'] == 'SW')
+        ) THEN
+            INCREMENT vehicles_straight by 1
+        ENDIF
+
+    ## Loop through each row of data to count bicycles
+
+    FOR each row in data:
+        IF row['VehicleType'] == 'Bicycle' THEN
+            INCREMENT total_bicycles by 1
+        ENDIF
+
+    ## Loop through each row of data to count vehicles over the speed limit
+
+    FOR each row in data:
+        IF float(row['VehicleSpeed']) > float(row['JunctionSpeedLimit']) THEN
+            INCREMENT over_speed_limit by 1
+        ENDIF
+
+    ## Loop through each row of data to count vehicles passing through Elm Avenue/Rabbit Road
+
+    FOR each row in data:
+        IF row['JunctionName'] == 'Elm Avenue/Rabbit Road' THEN
+            INCREMENT vehicles_elm_avenue by 1
+        ENDIF
+
+    ## Loop through each row of data to count vehicles passing through Hanley Highway/Westway
+
+    FOR each row in data:
+        IF row['JunctionName'] == 'Hanley Highway/Westway' THEN
+            INCREMENT vehicles_hanley_highway by 1
+        ENDIF
+
+    ## Loop through each row of data to count scooters passing through Elm Avenue/Rabbit Road
+
+    FOR each row in data:
+        IF row['JunctionName'] == 'Elm Avenue/Rabbit Road' AND row['VehicleType'] == 'Scooter' THEN
+            INCREMENT scooters_elm by 1
+        ENDIF
+
+    ## Loop through each row of data to count peak traffic hours at Hanley Highway/Westway
+
+    FOR each row in data:
+        junction_name = row['JunctionName']
+        time_of_day = row['timeOfDay']
+
+        IF junction_name == 'Hanley Highway/Westway' THEN
+            hour = int(time_of_day.split(':')[0])
+
+            IF hour < 9 THEN
+                key = "{hour}:00 - {hour + 1}:00"
+            ELSE IF hour == 9 THEN
+                key = "{hour}:00 - {hour + 1}:00"
+            ELSE
+                key = "{hour}:00 - {hour + 1}:00"
+            ENDIF
+
+            IF key is not in hour_dict THEN
+                hour_dict[key] = 0
+            ENDIF
+            INCREMENT hour_dict[key] by 1
+        ENDIF
+
+    ## making new dictionaries for the use of vehicle count
+
+    CREATE elm_avenue_data AS a dictionary with keys 0 to 23, all values set to 0
+    CREATE hanley_highway_data AS a dictionary with keys 0 to 23, all values set to 0
+
+    FOR each row IN data DO
+        SET hour TO the integer part of the 'timeOfDay' field from row, split at ':'
+        SET junction TO the 'JunctionName' field from row
+
+
+        IF junction IS "Elm Avenue/Rabbit Road" THEN
+          INCREMENT elm_avenue_data[hour] BY 1
+        ELSE IF junction IS "Hanley Highway/Westway" THEN
+          INCREMENT hanley_highway_data[hour] BY 1
+        END IF
+
+
+
+    ## create traffic data as a dictionary
+
+    SET traffic_data["Elm Avenue/Rabbit Road"] TO elm_avenue_data
+    SET traffic_data["Hanley Highway/Westway"] TO hanley_highway_data
+
+    ## Calculate maximum value from the hour_dict and identify keys with that value
+
+    max_value = max(hour_dict.values(), default=0)
+    max_keys = [key for key, value in hour_dict.items() if value == max_value]
+
+    IF length of max_keys > 1 THEN
+        peak_hour_string = join all elements of max_keys except the last one with commas, and add "and" followed by the last element of max_keys
+    ELSE
+        peak_hour_string = the first element of max_keys
+    END IF
+
+
+    ## Loop through each row of data to count rain hours
+
+    FOR each row in data:
+        IF row['Weather_Conditions'].lower() in ['heavy rain', 'light rain'] THEN
+            time = row['timeOfDay']
+            hour = datetime.strptime(time, '%H:%M:%S').hour
+            ADD hour to rain_hours
+        ENDIF
+    ENDLOOP
+
+    ## Calculate total rain hours
+
+    total_rain_hours = length of rain_hours
+
+    ## Calculate percentage of trucks
+
+    IF total_vehicles > 0 THEN
+        percentage_of_trucks = round((total_trucks / total_vehicles) * 100)
+    ELSE
+        percentage_of_trucks = 0
+    ENDIF
+
+    ## Calculate average bicycles per hour
+
+    IF total_bicycles > 0 THEN
+        average_bicycle_per_hour = round((total_bicycles / 24))
+    ELSE
+        average_bicycle_per_hour = 0
+    ENDIF
+
+    ## Calculate percentage of scooters passing through Elm Avenue
+
+    IF vehicles_elm_avenue > 0 THEN
+        percentage_of_scooters_elm = round((scooters_elm / vehicles_elm_avenue) * 100)
+    ELSE
+        percentage_of_scooters_elm = 0
+    ENDIF
+
+    ## Initialize a dictionary to store results
+
+    results = {
+        'Data file selected is': file_path.split('/')[-1],
+        'The total number of vehicles recorded for this date is': total_vehicles,
+        'The total number of trucks recorded for this date is': total_trucks,
+        'The total number of electric vehicles recorded for this date is': total_electric_vehicles,
+        'The total number of two-wheeled vehicles recorded for this date is': two_wheeled_vehicles,
+        'The total number of Buses leaving Elm Avenue/Rabbit Road heading North is': busses_north,
+        'The total number of vehicles through both junctions not turning left or right is': vehicles_straight,
+        'The percentage total number of vehicles recorded that are trucks for this date is': str(percentage_of_trucks) + '%',
+        'The average number of Bicycles per hour for this date is': average_bicycle_per_hour,
+        'The total number of vehicles recorded as over the speed limit for this date is': over_speed_limit,
+        'The total number of vehicles recorded through Elm Avenue/Rabbit Road Junction is': vehicles_elm_avenue,
+        'The total number of vehicles recorded through Hanley Highway/Westway junction is': vehicles_hanley_highway,
+        'The percentage of vehicles through Elm Avenue/Rabbit Road that are Scooters': str(percentage_of_scooters_elm) + '%',
+        'The number of vehicles recorded in the peak (busiest) hour on Hanley Highway/Westway': max_value,
+        'The time or times of the peak (busiest) traffic hour (or hours) on Hanley Highway/Westway': max_keys,
+        'The total number of hours of rain': total_rain_hours
+    }
+
+    ## Return the results dictionary
+
+    RETURN results,traffic_data
+
+
+FUNCTION display_outcomes(outcomes)
+    PRINT "program Results" CENTERED in 60 characters with '='
+
+    FOR EACH key, value IN outcomes
+        PRINT key AND value in the format "key value"
+    END FOR
+
+    PRINT 60 '=' characters to separate the output
+END FUNCTION
+
+
+# Task C: Save Results to Text File
+
+
+FUNCTION save_results_to_a_file(outcomes, file_name='result.txt')
+    TRY
+        OPEN file with name 'file_name' in append mode
+            WRITE '\n===program Results===\n' to the file
+            FOR EACH key, value IN outcomes
+                WRITE key and value to the file in the format "key value"
+            END FOR
+            WRITE a new line after the loop
+        CLOSE file
+        PRINT "Results saved successfully to" followed by the file name
+    CATCH Exception AS e
+        PRINT "An error occurred while saving results:" followed by the exception message
+    END TRY
+END FUNCTION
+
+
+# Task D: Histogram Display
+
+IMPORT 'Tkinter' module as tk
+
+CLASS HistogramApp
+
+    FUNCTION __init__(traffic_data,date)
+
+    ## Initialize class with the traffic data and date
+
+        SET self.traffic_data=traffic_data
+        SET self.date=date
+
+    ## Getting traffic data for two specific junctions
+
+        SET elm_traffic=traffic_data['Elm Avenue/Rabbit Road']
+        SET hanley_traffic=traffic_data['Hanley Highway/Westway']
+
+        ## making up the main window for the Tkinter
+
+        CREATE self.root AS Tkinter Window
+        SET window title to 'Histogram'
+
+        ## create canvas for drawing the histogram
+
+        CREATE self.canvas AS Canvas(width=1600,height=900, bg='white')
+        PACK self.canvas
+
+    FUNCTION setup_window
+
+        ## creating a title for the window including date
+
+        SET title='Histogram of Vehicles Frequency per Hour{date}'
+
+        ## Adding text for the title at the top of the window
+
+        DRAW text ON self.canvas(x=800,y=20,text=title,font=('Arial,16),bold)
+
+    FUNCTION draw_histogram
+
+        ## setting up colors for the junction bars
+
+        SET colors=['blue','pink']
+
+        ## Getting a list of junction names from the traffic data
+
+        SET junctions=KEYS FROM self.traffic_data
+
+        ## creating a range from 0 to 23 for the hours of days
+
+        SET hours=RANGE(24)
+
+        ## Find the maximun traffic volume to scale the bars
+
+        SET max_volume=0
+        FOR EACH junction IN junctions
+            FOR EACH hour IN hours
+                SET volume=self.traffic_data[junction][hour]
+                IF volume>max_volume THEN
+                    SET max_volume =volume
+                ENDIF
+
+
+        ## scaling y axis
+
+        SET y_scale=400/max_volume
+
+        ## width of the bars and the gap between hours on x axis
+
+        SET bar_width=20
+        SET gap_between_hours=53
+
+        ## Drawing X axis and Y axis seperately
+
+        DRAW line ON self.canvas(x1=100,y1=500,x2=1500,y2=500)
+        DRAW line ON self.canvas(x1=100,y1=500,x2=100,y2=100)
+
+        ## Labeling X axis and Y axis
+
+        DRAW text ON self.canvas(x=600,y=530,text='Hours 00:00 to 24:00',font=('Arial,12),fill='black')
+        DRAW text ON self.canvas(x=60,y=300,text='Traffic Volume',font=('Arial,12),angle=90,fill='black')
+
+        ##draw the bars of histogram for each junctions
+
+        SET color_index=0
+        FOR EACH junction IN junctions
+            FOR EACH hour IN hours
+                SET volume=self.traffic_data[junction][hour]
+
+                ##Calculate x co-orinates for the lest and right sides of the bar
+
+                SET x1 = 100 + (hour * gap_between_hours) + color_index * bar_width
+                SET x2 = x1 + bar_width
+
+                ##Calculate y co-ordinates for the top and bottom of the bar
+
+                SET y1 = 500 - (volume * y_scale)
+                SET y2 = 500
+
+                ##drawing rectangles for eacg hours
+
+                DRAW rectangle ON self.canvas (x1, y1, x2, y2, fill=colors[color_index % LENGTH(colors)])
+
+                ##show the  count of the vehilces on top of the bar
+
+                DRAW text ON self.canvas (x=(x1+x2)/2, y=y1-10, text=volume, font='Arial', 8)
+
+            ##Moving to the next color for the next junction
+
+            INCREMENT color_index
+
+        ## labeling the  hours at the bottom of the histogram
+
+        FOR EACH hour IN hours
+            SET x = 100 + (hour * gap_between_hours) + bar_width
+            DRAW text ON self.canvas (x=x, y=510, text=hour, font='Arial', 10)
+
+    FUNCTION add_legend()
+
+        ##Adding a legend to explain which color represents with each junctions
+
+        SET colors = ['blue', 'pink']
+        SET junctions = KEYS FROM self.traffic_data
+
+        ##Loop through each junctions to create a legend entry
+
+        SET index = 0
+        FOR EACH junction IN junctions
+
+            ##drawing a colored rectangle for each junction in the legend
+
+            DRAW rectangle ON self.canvas (x1=800, y1=40 + index*20, x2=820, y2=60 + index*20, fill=colors[index % LENGTH(colors)])
+
+            ##Adding text next to the colored rectabgle to name the junction
+
+            DRAW text ON self.canvas (x=830, y=50 + index*20, text=junction, font='Arial', 10, anchor='w')
+            INCREMENT index
+
+    FUNCTION run()
+
+        ##setting upm window and drawing the histogram and legend
+
+        CALL setup_window()
+        CALL draw_histogram()
+        CALL add_legend()
+
+        ##starting Tkinter mainloop to display the window
+
+        START main loop ON self.root
+
+# Task E: Code Loops to Handle Multiple CSV Files
+
+CLASS MultiCSVProcessor
+
+    FUNCTION __init__()
+    """
+    Initializes the application for processing multiple CSV files.
+    """
+        SET self.current_data = None
+
+    FUNCTION load_csv_file(file_path)
+
+    """
+    Loads a CSV file and process its data
+    """
+
+        TRY
+            ## open the file and read
+
+            OPEN file at file_path
+            CALL process_csv_data(file_path) AND STORE results, traffic_data
+            RETURN results, traffic_data
+        EXCEPT FileNotFoundError
+
+            ##handle the case when there is no any file
+
+            PRINT "Error: The file '{file_path}' does not exist."
+            RETURN None, None
+        END TRY
+
+    FUNCTION clear_previous_data()
+
+        """
+        Clears data from the previous run to process a new dataset.
+        """
+        SET self.current_data = None
+
+    FUNCTION handle_user_interaction()
+
+    """
+    Handles user input for processing multiple files
+    """
+
+        WHILE True
+
+            ## get the valid inputs from the user
+
+            CALL validate_data_input() AND STORE day, month, year
+
+            ## process the file path based on given inputs
+
+            SET file_path = "traffic_data{day:02}{month:02}{year}.csv"
+
+            ##load and process the csv file using the processed file path
+
+            CALL self.load_csv_file(file_path) AND STORE results, traffic_data
+
+            IF results IS NOT None
+
+                CALL display_outcomes(results)
+
+                CALL save_results_to_a_file(results)
+
+                SET self.current_data = traffic_data
+
+                ##launch Histogram app with the processed traffic data and the date
+
+                CREATE app AS HistogramApp(traffic_data, date=f'{day:02}/{month:02}/{year}')
+                CALL app.run()
+            ELSE
+                PRINT "Please try again or type 'N' to quit"
+
+            ENDIF
+
+            ## ask the user for loading another data set
+
+            CALL vaildate_continue_input() AND STORE choice
+
+            ##if user chooses 'N', the loop will get exit and program will get end
+
+            IF choice == 'N'
+
+                PRINT "The End!"
+                BREAK
+            ENDIF
+
+    FUNCTION process_files()
+
+        """
+        Main loop for handling multiple CSV files until the user decides to quit.
+        """
+        CALL self.handle_user_interaction()
+
+## starting processing file using MultiCSVProcessor
+
+SET processor = MultiCSVProcessor()
+CALL processor.process_files()
+
+END
+

@@ -1,6 +1,6 @@
 # Traffic Data Processing and Visualization
 
-A Python-based project that processes and visualizes traffic data. The project includes data validation, CSV parsing, result saving, and histogram display using Tkinter for the GUI.
+A Python-based project that processes and visualizes traffic data.This project was developed as part of the **Software Development 1** module in the **1st Year, 1st Semester**. The project includes data validation, CSV parsing, result saving, and histogram display using Tkinter for the GUI.
 
 ## Features
 
